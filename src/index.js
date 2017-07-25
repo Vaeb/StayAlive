@@ -55,7 +55,7 @@ async function keepAlive() {
 
             log('[Auto] Restarted VaeBot');
 
-            const embedObj = new Discord.RichEmbed()
+            const embedObj = (new Discord.RichEmbed())
             .setTitle('[StayAlive]')
             .setDescription('VaeBot has been detected as offline and will now be automatically restarted')
             .setColor(0x00E676);
