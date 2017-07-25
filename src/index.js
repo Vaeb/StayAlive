@@ -4,7 +4,6 @@ console.log('\n-STARTING-\n');
 
 const Auth = require('./auth.js');
 const NodeUtil = require('util');
-const Exec = require('child_process').exec;
 const Forever = require('forever-monitor');
 const DateFormat = require('dateformat');
 const Discord = require('discord.js');
@@ -45,8 +44,10 @@ let hasRestarted = false;
 
 async function keepAlive() {
     const guild = client.guilds.first();
-    if (!guild) return;
+    if (!guild) return log('[ERROR] Guild not found');
+
     const mainBot = await guild.fetchMember(mainBotId, false);
+
     if (!mainBot && !hasRestarted) {
         hasRestarted = true;
 
@@ -63,13 +64,20 @@ async function keepAlive() {
         });
 
         child.start();
-    } else if (mainBot && hasRestarted) {
-        // hasRestarted = false;
+    } else if (mainBot) {
+        log('VaeBot found');
+        // if (hasRestarted) hasRestarted = false;
     }
+
+    return true;
 }
 
 client.on('ready', async () => {
     log(`> Connected as ${client.user.username}!`);
+
+    client.setInterval(keepAlive, 1000 * 60);
+
+    keepAlive();
 });
 
 client.on('disconnect', (closeEvent) => {
@@ -79,10 +87,6 @@ client.on('disconnect', (closeEvent) => {
     log(`Reason: ${closeEvent.reason}`);
     log(`Clean: ${closeEvent.wasClean}`);
 });
-
-setInterval(keepAlive, 1000 * 60);
-
-keepAlive();
 
 log('-CONNECTING-');
 
