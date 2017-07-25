@@ -47,8 +47,9 @@ async function keepAlive() {
     if (!guild) return log('[ERROR] Guild not found');
 
     const mainBot = await guild.fetchMember(mainBotId, false);
+    const isOnline = mainBot ? mainBot.user.presence.status == 'online' : false;
 
-    if (!mainBot && !hasRestarted) {
+    if (!isOnline && !hasRestarted) {
         hasRestarted = true;
 
         log('[Auto] Restarted VaeBot');
@@ -64,7 +65,7 @@ async function keepAlive() {
         });
 
         child.start();
-    } else if (mainBot) {
+    } else if (isOnline) {
         log('VaeBot found');
         // if (hasRestarted) hasRestarted = false;
     }
