@@ -49,7 +49,7 @@ async function keepAlive() {
     const mainBot = await guild.fetchMember(mainBotId, false);
     const isOnline = mainBot ? mainBot.user.presence.status == 'online' : false;
 
-    if (isOnline) {
+    if (!isOnline) {
         if (!hasRestarted) {
             hasRestarted = true;
 
