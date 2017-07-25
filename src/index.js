@@ -68,6 +68,18 @@ async function keepAlive() {
     }
 }
 
+client.on('ready', async () => {
+    log(`> Connected as ${client.user.username}!`);
+});
+
+client.on('disconnect', (closeEvent) => {
+    log('> Disconnected');
+    log(closeEvent);
+    log(`Code: ${closeEvent.code}`);
+    log(`Reason: ${closeEvent.reason}`);
+    log(`Clean: ${closeEvent.wasClean}`);
+});
+
 setInterval(keepAlive, 1000 * 60);
 
 keepAlive();
@@ -75,3 +87,7 @@ keepAlive();
 log('-CONNECTING-');
 
 client.login(Auth.discordToken);
+
+process.on('unhandledRejection', (err) => {
+    console.error(`Uncaught Promise Error: \n${err.stack}`);
+});
