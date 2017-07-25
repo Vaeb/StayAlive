@@ -60,7 +60,7 @@ async function keepAlive() {
             .setDescription('VaeBot has been detected as offline and will now be automatically restarted')
             .setColor(0x00E676);
 
-            guild.defaultChannel.send({ embedObj })
+            guild.defaultChannel.send(undefined, { embed: embedObj })
             .catch(log);
 
             const child = new (Forever.Monitor)('/home/flipflop8421/files/discordExp/VaeBot/index.js', {
