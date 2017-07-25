@@ -1,2 +1,2 @@
 # StayAlive
-Created to keep VaeBot alive
+Created to keep VaeBot alive.
