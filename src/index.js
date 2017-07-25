@@ -49,24 +49,28 @@ async function keepAlive() {
     const mainBot = await guild.fetchMember(mainBotId, false);
     const isOnline = mainBot ? mainBot.user.presence.status == 'online' : false;
 
-    if (!isOnline && !hasRestarted) {
-        hasRestarted = true;
+    if (isOnline) {
+        if (!hasRestarted) {
+            hasRestarted = true;
 
-        log('[Auto] Restarted VaeBot');
+            log('[Auto] Restarted VaeBot');
 
-        const child = new (Forever.Monitor)('/home/flipflop8421/files/discordExp/VaeBot/index.js', {
-            max: 10,
-            silent: true,
-            args: [],
-        });
+            const child = new (Forever.Monitor)('/home/flipflop8421/files/discordExp/VaeBot/index.js', {
+                max: 10,
+                silent: true,
+                args: [],
+            });
 
-        child.on('exit', () => {
-            log('VaeBot has exited after 10 restarts');
-        });
+            child.on('exit', () => {
+                log('VaeBot has exited after 10 restarts');
+            });
 
-        child.start();
-    } else if (isOnline) {
-        log('VaeBot found');
+            child.start();
+        } else {
+            log('VaeBot not found online | Already restarted');
+        }
+    } else {
+        log('VaeBot found online');
         // if (hasRestarted) hasRestarted = false;
     }
 
