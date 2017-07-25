@@ -47,8 +47,24 @@ function log(...args) {
 
 let hasRestarted = false;
 let guildExists = true;
+let monitor;
 
-function doStop() {
+function doStop(channel) {
+    if (!monitor) {
+        console.log('VaeBot is not in production mode');
+        const embedObj = new Discord.MessageEmbed()
+        .setTitle('Command Failed')
+        .setDescription(channel ? 'Restarting VaeBot in production mode' : 'VaeBot detected offline: Remotely restarting in production mode')
+        .setColor(0x00E676);
+
+        channel.send(undefined, { embed: embedObj })
+        .catch(log);
+
+        return;
+    }
+
+    monitor.stop();
+
     console.log(Forever.list());
 }
 
@@ -78,7 +94,9 @@ function doRestart(guild, channel) {
 
         child.start(); */
 
-        console.log(Forever.startDaemon('/home/flipflop8421/files/discordExp/VaeBot/index.js'));
+        monitor = Forever.startDaemon('/home/flipflop8421/files/discordExp/VaeBot/index.js');
+
+        Forever.startServer(monitor);
     } else {
         log('VaeBot not found online | Already restarted');
         if (channel) {
