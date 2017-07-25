@@ -55,6 +55,14 @@ async function keepAlive() {
 
             log('[Auto] Restarted VaeBot');
 
+            const embedObj = new Discord.RichEmbed()
+            .setTitle('[StayAlive]')
+            .setDescription('VaeBot has been detected as offline and will now be automatically restarted')
+            .setColor(0x00E676);
+
+            guild.defaultChannel.send(undefined, { embed: embedObj })
+            .catch(log);
+
             const child = new (Forever.Monitor)('/home/flipflop8421/files/discordExp/VaeBot/index.js', {
                 max: 10,
                 silent: true,
@@ -80,7 +88,7 @@ async function keepAlive() {
 client.on('ready', async () => {
     log(`> Connected as ${client.user.username}!`);
 
-    client.setInterval(keepAlive, 1000 * 60);
+    client.setInterval(keepAlive, 1000 * 15);
 
     keepAlive();
 });
