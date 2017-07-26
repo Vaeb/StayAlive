@@ -200,8 +200,22 @@ function doDisable(channel) {
     autoEnabled = true;
 
     const embedObj = new Discord.MessageEmbed()
-    .setTitle('Settings')
+    .setTitle('StayAlive Settings')
     .setDescription('Automatic protection is now disabled!')
+    .setColor(0x00E676);
+
+    channel.send(undefined, { embed: embedObj })
+    .catch(log);
+}
+
+function booleanToStr(bool) {
+    return bool ? 'Enabled' : 'Disabled';
+}
+
+function doStatus(channel) {
+    const embedObj = new Discord.MessageEmbed()
+    .setTitle('StayAlive Status')
+    .setDescription(`Automatic protection: ${booleanToStr(autoEnabled)} | VaeBot production mode: ${booleanToStr(inProduction)}`)
     .setColor(0x00E676);
 
     channel.send(undefined, { embed: embedObj })
@@ -223,6 +237,9 @@ client.on('message', (msgObj) => {
             break;
         case '!disable':
             doDisable(channel);
+            break;
+        case '!status':
+            doStatus(channel);
             break;
         case '!start':
             doStart(guild, channel);
