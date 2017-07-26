@@ -5,6 +5,7 @@ console.log('\n-STARTING-\n');
 const Auth = require('./auth.js');
 const NodeUtil = require('util');
 const Forever = require('forever');
+const PM2Mod = require('pm2');
 const DateFormat = require('dateformat');
 const Discord = require('discord.js');
 
@@ -65,7 +66,7 @@ function doStop(channel) {
 
     monitor.stop();
 
-    console.log(Forever.list());
+    // console.log(Forever.list());
 }
 
 function doRestart(guild, channel) {
@@ -82,21 +83,15 @@ function doRestart(guild, channel) {
         (channel || guild.defaultChannel).send(undefined, { embed: embedObj })
         .catch(log);
 
-        /* const child = new (Forever.Monitor)('/home/flipflop8421/files/discordExp/VaeBot/index.js', {
-            max: 10,
-            silent: true,
-            args: [],
+        /* monitor = Forever.startDaemon('/home/flipflop8421/files/discordExp/VaeBot/index.js');
+        console.log(Forever.startServer(monitor)); */
+
+        PM2Mod.start({
+            script: '/home/flipflop8421/files/discordExp/VaeBot/index.js',
+        }, (err) => {
+            PM2Mod.disconnect(); // Disconnects from PM2
+            if (err) log(err);
         });
-
-        child.on('exit', () => {
-            log('VaeBot has exited after 10 restarts');
-        });
-
-        child.start(); */
-
-        monitor = Forever.startDaemon('/home/flipflop8421/files/discordExp/VaeBot/index.js');
-
-        Forever.startServer(monitor);
     } else {
         log('VaeBot not found online | Already restarted');
         if (channel) {
@@ -171,7 +166,10 @@ client.on('message', (msgObj) => {
 
 log('-CONNECTING-');
 
-client.login(Auth.discordToken);
+PM2Mod.connect((err) => {
+    if (err) log(err);
+    client.login(Auth.discordToken);
+});
 
 process.on('unhandledRejection', (err) => {
     console.error(`Uncaught Promise Error: \n${err.stack}`);
