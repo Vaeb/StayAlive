@@ -46,6 +46,7 @@ function log(...args) {
     postOutString(args, true);
 }
 
+let autoEnabled = true;
 let inProduction = false;
 let guildExists = true;
 let connections = 0;
@@ -91,7 +92,7 @@ function doStop(channel) {
         });
     });
 
-    log(`[${channel ? 'Manual' : 'Auto'}] Stopped VaeBot`);
+    log('[Manual] Stopped VaeBot');
     const embedObj = new Discord.MessageEmbed()
     .setTitle('Handling Process')
     .setDescription('Stopping VaeBot if it\'s running in production mode')
@@ -142,6 +143,8 @@ function doStart(guild, channel) {
 }
 
 async function keepAlive() {
+    if (!autoEnabled) return false;
+
     const guild = client.guilds.first();
     if (!guild) {
         if (guildExists) {
@@ -190,6 +193,12 @@ client.on('message', (msgObj) => {
     const contentLower = msgObj.content.toLowerCase();
 
     switch (contentLower) {
+        case '!enable':
+            autoEnabled = true;
+            break;
+        case '!disable':
+            autoEnabled = false;
+            break;
         case '!start':
             doStart(guild, channel);
             break;
