@@ -71,21 +71,21 @@ function PM2Disconnect() {
 }
 
 function doStop(channel) {
-    if (!nodeProc) {
+    /* if (!nodeProc) {
         log('VaeBot is not in production mode');
         const embedObj = new Discord.MessageEmbed()
         .setTitle('Command Failed')
-        .setDescription(channel ? 'Restarting VaeBot in production mode' : 'VaeBot detected offline: Remotely restarting in production mode')
+        .setDescription('VaeBot not in production mode')
         .setColor(0x00E676);
 
         channel.send(undefined, { embed: embedObj })
         .catch(log);
 
         return;
-    }
+    } */
 
     PM2Connect(() => {
-        PM2Mod.stop(nodeProc, (err) => {
+        PM2Mod.delete('/home/flipflop8421/files/discordExp/VaeBot/index.js', (err) => {
             if (err) log(err);
             PM2Disconnect();
         });
@@ -93,15 +93,15 @@ function doStop(channel) {
 
     log(`[${channel ? 'Manual' : 'Auto'}] Stopped VaeBot`);
     const embedObj = new Discord.MessageEmbed()
-    .setTitle('Command Failed')
-    .setDescription(channel ? 'Restarting VaeBot in production mode' : 'VaeBot detected offline: Remotely restarting in production mode')
+    .setTitle('Stop Process')
+    .setDescription('Stopping VaeBot if it\'s running in production mode')
     .setColor(0x00E676);
 
     channel.send(undefined, { embed: embedObj })
     .catch(log);
 }
 
-function doRestart(guild, channel) {
+function doStart(guild, channel) {
     if (!hasRestarted) {
         hasRestarted = true;
 
@@ -155,7 +155,7 @@ async function keepAlive() {
     const isOnline = mainBot ? mainBot.user.presence.status == 'online' : false;
 
     if (!isOnline) {
-        doRestart(guild);
+        doStart(guild);
     } else {
         // log('VaeBot found online');
         // if (hasRestarted) hasRestarted = false;
@@ -190,8 +190,8 @@ client.on('message', (msgObj) => {
     const contentLower = msgObj.content.toLowerCase();
 
     switch (contentLower) {
-        case '!restart':
-            doRestart(guild, channel);
+        case '!start':
+            doStart(guild, channel);
             break;
         case '!stop':
             doStop(channel);
