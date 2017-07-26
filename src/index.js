@@ -93,6 +93,7 @@ function doStop(channel) {
     });
 
     log('[Manual] Stopped VaeBot');
+
     const embedObj = new Discord.MessageEmbed()
     .setTitle('Handling Process')
     .setDescription('Stopping VaeBot if it\'s running in production mode')
@@ -122,9 +123,9 @@ function doStart(guild, channel) {
         PM2Connect(() => {
             PM2Mod.start({
                 script: '/home/flipflop8421/files/discordExp/VaeBot/index.js',
-            }, (err, proc) => {
+            }, (err) => {
                 if (err) log(err);
-                nodeProc = proc;
+                // nodeProc = proc;
                 PM2Disconnect();
             });
         });
@@ -183,6 +184,30 @@ client.on('disconnect', (closeEvent) => {
     log(`Clean: ${closeEvent.wasClean}`);
 });
 
+function doEnable(channel) {
+    autoEnabled = true;
+
+    const embedObj = new Discord.MessageEmbed()
+    .setTitle('Settings')
+    .setDescription('Automatic protection is now enabled!')
+    .setColor(0x00E676);
+
+    channel.send(undefined, { embed: embedObj })
+    .catch(log);
+}
+
+function doDisable(channel) {
+    autoEnabled = true;
+
+    const embedObj = new Discord.MessageEmbed()
+    .setTitle('Settings')
+    .setDescription('Automatic protection is now disabled!')
+    .setColor(0x00E676);
+
+    channel.send(undefined, { embed: embedObj })
+    .catch(log);
+}
+
 client.on('message', (msgObj) => {
     const guild = msgObj.guild;
     const speaker = msgObj.member;
@@ -194,10 +219,10 @@ client.on('message', (msgObj) => {
 
     switch (contentLower) {
         case '!enable':
-            autoEnabled = true;
+            doEnable(channel);
             break;
         case '!disable':
-            autoEnabled = false;
+            doDisable(channel);
             break;
         case '!start':
             doStart(guild, channel);
