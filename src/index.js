@@ -46,9 +46,8 @@ function log(...args) {
     postOutString(args, true);
 }
 
-let hasRestarted = false;
+let inProduction = false;
 let guildExists = true;
-let nodeProc;
 let connections = 0;
 
 function PM2Connect(callback) {
@@ -87,13 +86,14 @@ function doStop(channel) {
     PM2Connect(() => {
         PM2Mod.delete('/home/flipflop8421/files/discordExp/VaeBot/index.js', (err) => {
             if (err) log(err);
+            inProduction = false;
             PM2Disconnect();
         });
     });
 
     log(`[${channel ? 'Manual' : 'Auto'}] Stopped VaeBot`);
     const embedObj = new Discord.MessageEmbed()
-    .setTitle('Stop Process')
+    .setTitle('Handling Process')
     .setDescription('Stopping VaeBot if it\'s running in production mode')
     .setColor(0x00E676);
 
@@ -102,8 +102,8 @@ function doStop(channel) {
 }
 
 function doStart(guild, channel) {
-    if (!hasRestarted) {
-        hasRestarted = true;
+    if (!inProduction) {
+        inProduction = true;
 
         log(`[${channel ? 'Manual' : 'Auto'}] Restarted VaeBot`);
 
@@ -132,7 +132,7 @@ function doStart(guild, channel) {
         if (channel) {
             const embedObj = new Discord.MessageEmbed()
             .setTitle('Command Failed')
-            .setDescription('VaeBot has already been put into production mode')
+            .setDescription('VaeBot has already been started into production mode')
             .setColor(0x00E676);
 
             guild.defaultChannel.send(undefined, { embed: embedObj })
@@ -158,7 +158,7 @@ async function keepAlive() {
         doStart(guild);
     } else {
         // log('VaeBot found online');
-        // if (hasRestarted) hasRestarted = false;
+        // if (inProduction) inProduction = false;
     }
 
     return true;
