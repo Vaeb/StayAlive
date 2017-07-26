@@ -4,7 +4,7 @@ console.log('\n-STARTING-\n');
 
 const Auth = require('./auth.js');
 const NodeUtil = require('util');
-const Forever = require('forever');
+// const Forever = require('forever');
 const PM2Mod = require('pm2');
 const DateFormat = require('dateformat');
 const Discord = require('discord.js');
@@ -48,11 +48,31 @@ function log(...args) {
 
 let hasRestarted = false;
 let guildExists = true;
-let monitor;
+let nodeProc;
+let connections = 0;
+
+function PM2Connect(callback) {
+    if (connections++ == 0) {
+        PM2Mod.connect((err) => {
+            if (err) {
+                --connections;
+                log(err);
+                return;
+            }
+            callback();
+        });
+    } else {
+        callback();
+    }
+}
+
+function PM2Disconnect() {
+    if (--connections == 0) PM2Mod.disconnect();
+}
 
 function doStop(channel) {
-    if (!monitor) {
-        console.log('VaeBot is not in production mode');
+    if (!nodeProc) {
+        log('VaeBot is not in production mode');
         const embedObj = new Discord.MessageEmbed()
         .setTitle('Command Failed')
         .setDescription(channel ? 'Restarting VaeBot in production mode' : 'VaeBot detected offline: Remotely restarting in production mode')
@@ -64,16 +84,28 @@ function doStop(channel) {
         return;
     }
 
-    monitor.stop();
+    PM2Connect(() => {
+        PM2Mod.stop(nodeProc, (err) => {
+            if (err) log(err);
+            PM2Disconnect();
+        });
+    });
 
-    // console.log(Forever.list());
+    log(`[${channel ? 'Manual' : 'Auto'}] Stopped VaeBot`);
+    const embedObj = new Discord.MessageEmbed()
+    .setTitle('Command Failed')
+    .setDescription(channel ? 'Restarting VaeBot in production mode' : 'VaeBot detected offline: Remotely restarting in production mode')
+    .setColor(0x00E676);
+
+    channel.send(undefined, { embed: embedObj })
+    .catch(log);
 }
 
 function doRestart(guild, channel) {
     if (!hasRestarted) {
         hasRestarted = true;
 
-        log('[Auto] Restarted VaeBot');
+        log(`[${channel ? 'Manual' : 'Auto'}] Restarted VaeBot`);
 
         const embedObj = new Discord.MessageEmbed()
         .setTitle(channel ? 'Manual Protection' : 'Automatic Protection')
@@ -83,14 +115,17 @@ function doRestart(guild, channel) {
         (channel || guild.defaultChannel).send(undefined, { embed: embedObj })
         .catch(log);
 
-        /* monitor = Forever.startDaemon('/home/flipflop8421/files/discordExp/VaeBot/index.js');
-        console.log(Forever.startServer(monitor)); */
+        /* nodeProc = Forever.startDaemon('/home/flipflop8421/files/discordExp/VaeBot/index.js');
+        log(Forever.startServer(nodeProc)); */
 
-        PM2Mod.start({
-            script: '/home/flipflop8421/files/discordExp/VaeBot/index.js',
-        }, (err) => {
-            PM2Mod.disconnect(); // Disconnects from PM2
-            if (err) log(err);
+        PM2Connect(() => {
+            PM2Mod.start({
+                script: '/home/flipflop8421/files/discordExp/VaeBot/index.js',
+            }, (err, proc) => {
+                if (err) log(err);
+                nodeProc = proc;
+                PM2Disconnect();
+            });
         });
     } else {
         log('VaeBot not found online | Already restarted');
@@ -166,10 +201,7 @@ client.on('message', (msgObj) => {
 
 log('-CONNECTING-');
 
-PM2Mod.connect((err) => {
-    if (err) log(err);
-    client.login(Auth.discordToken);
-});
+client.login(Auth.discordToken);
 
 process.on('unhandledRejection', (err) => {
     console.error(`Uncaught Promise Error: \n${err.stack}`);
