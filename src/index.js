@@ -194,7 +194,7 @@ client.on('message', (msgObj) => {
             doRestart(guild, channel);
             break;
         case '!stop':
-            doStop();
+            doStop(channel);
             break;
     }
 });
