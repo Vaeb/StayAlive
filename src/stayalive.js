@@ -197,7 +197,7 @@ function doEnable(channel) {
 }
 
 function doDisable(channel) {
-    autoEnabled = true;
+    autoEnabled = false;
 
     const embedObj = new Discord.MessageEmbed()
     .setTitle('StayAlive Settings')
